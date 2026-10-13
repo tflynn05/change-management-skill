@@ -67,7 +67,7 @@ The output is excellent for a change lead and too long for a sponsor: a 29-row c
 
 ### 7. It could not know the rollout was already underway
 
-The input was written as planning stage, so the skill planned from G-20w. The actual rollout managed the people side reactively, after delivery was already moving. The skill has no way to detect that from a description that does not say so, which is fine; but it means the honest use of this skill mid-rollout is to compress the diagnostic steps into weeks, and the plan now says what to do in that case (assumption 1 covers it).
+The input was written as planning stage, so the skill planned from G-20w. On the actual rollout, people-side work was sequenced after technical delivery was already moving. The skill has no way to detect that from a description that does not say so, which is fine; but it means the honest use of this skill mid-rollout is to compress the diagnostic steps into weeks, and the plan now says what to do in that case (assumption 1 covers it).
 
 ## Scorecard
 
