@@ -2,7 +2,9 @@
 
 Give it a description of a platform, tool, or AI rollout. It returns a change management plan: a stakeholder and resistance map, an ADKAR-style readiness assessment with the barrier point for each group, a communications and training plan sequenced to that assessment, the adoption metrics to track, and a list of the judgment calls only an insider can make.
 
-It encodes two things: the structure of a widely used individual-change model, and what I learned leading operations for an enterprise AI decisioning rollout where the technology worked and adoption was the hard part. Then it was tested blind against that rollout, and the places it was wrong were fed back into the skill. The test and the scorecard are in [`examples/pega-1to1-ops-manager/`](examples/pega-1to1-ops-manager/).
+It encodes two things: the structure of a widely used individual-change model, and what I learned leading operations for an enterprise AI decisioning rollout where the technology worked and adoption was the hard part. Then it was tested blind against that rollout, and the places it was wrong were fed back into the skill. The test and the evaluation are in [`examples/pega-1to1-ops-manager/`](examples/pega-1to1-ops-manager/).
+
+Built by [Tim Flynn](https://www.linkedin.com/in/tim-flynn), Prosci® Certified Change Practitioner. I led operations and marketing readiness for an enterprise AI decisioning rollout across 15+ lines of business, and this skill is what I wished I had on day one.
 
 ## What it produces
 
@@ -20,6 +22,14 @@ The operating principles are in [`change-management/SKILL.md`](change-management
 
 - **Awareness is rarely the barrier on an AI rollout.** Experienced practitioners know the change is coming. They stall at Desire (trust, control, role identity) and Ability. The skill starts there.
 - **Sponsor consistency across business units is the strongest predictor of adoption.** Where one platform goes to several units, the plan maps every unit leader and treats a passive one as the top risk.
+
+## What the output looks like
+
+The opening of the blind-run plan, unedited, to show the register it writes in:
+
+> **Where we are.** The description reads as planning stage, at or just after kickoff, with first LOB go-live around month 6. The plan therefore front-loads the diagnostics and the sponsor-coalition work; the communications calendar is keyed to each LOB wave's go-live so it survives date changes. The technology is not the risk here. The risk is that experienced marketers who built and own their own targeting logic are being asked to hand the targeting decision to a model, in several LOBs whose leaders do not report to the sponsor, in an organization whose last several martech rollouts had mixed adoption.
+
+The full plan is [`examples/pega-1to1-ops-manager/OUTPUT.md`](examples/pega-1to1-ops-manager/OUTPUT.md). Note that it predates the one-page-summary and metrics-cap changes described under [The test](#the-test); the current skill produces a shorter plan that opens with the summary.
 
 ## Install
 
@@ -90,13 +100,19 @@ examples/pega-1to1-ops-manager/
   OUTPUT.md                   the blind run's plan, unedited
   GROUND-TRUTH.md             what the assessments and the rollout actually showed
   EVALUATION.md               right versus judgment, and the skill changes that followed
+gemini-port/                  the same skill run through Google ADK + Gemini, with a comparison
+LICENSE                       MIT
 ```
+
+## Gemini port
+
+[`gemini-port/`](gemini-port/) runs the same skill files through Google's Agent Development Kit with a Gemini model, on the same blind input, so the two models can be compared like for like. See [`gemini-port/COMPARISON.md`](gemini-port/COMPARISON.md).
 
 ## Scope and attribution
 
 The skill applies the publicly described structure of the ADKAR model (Awareness, Desire, Knowledge, Ability, Reinforcement) and the common practitioner view of project health across sponsorship, project management, and change management. ADKAR is a registered trademark of Prosci Inc. This project is not affiliated with or endorsed by Prosci; it does not reproduce Prosci's licensed materials, assessments, or templates. The readiness questions, health-check questions, resistance patterns, and plan structure are my own.
 
-The example uses a real rollout. It contains my own assessment results and observations at the level of a case study. It contains no customer data, no colleague names, and no internal figures.
+The example uses a real rollout. It contains my own assessment results and observations at the level of a case study, completed as certification coursework after my time on the program ended. It contains no customer data, no colleague names, and no internal figures, and it describes conditions of the program rather than the performance of any individual.
 
 ## License
 
