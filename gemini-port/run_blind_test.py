@@ -3,7 +3,8 @@
 and save the untouched output next to the Claude output for comparison.
 
 Usage (from gemini-port/, with GOOGLE_API_KEY in change_management_agent/.env):
-    python run_blind_test.py                       # tries gemini-3.8-flash, 3.8-pro, then the -latest aliases
+    python run_blind_test.py                       # discovers the models your key can use; tries Flash-Lite, then Flash, then Pro
+    python run_blind_test.py --list-models         # just print them
     python run_blind_test.py --model gemini-3.8-pro --out OUTPUT-gemini-pro.md
 Retries with backoff on 503 (high demand) and 429 (rate limit).
 """
@@ -22,9 +23,33 @@ INPUT = HERE.parent / "examples" / "pega-1to1-ops-manager" / "INPUT.md"
 
 
 # Google retired the 2.x model ids for new users (Oct 2026); its error message names gemini-3.8-flash.
-# Free tier (Oct 2026): Pro models return 404 or a zero quota; only Flash is reachable.
-# With billing enabled, add "gemini-3.8-pro" here or pass --model gemini-3.8-pro.
-DEFAULT_MODELS = ["gemini-3.8-flash", "gemini-flash-latest"]
+def discover_models() -> list:
+    """Ask the API which models this key can use, and order them lightest first.
+    Flash-Lite variants have the least demand on the free tier, then Flash, then Pro.
+    Falls back to a static list if the listing call fails."""
+    try:
+        from google import genai
+        client = genai.Client()
+        names = []
+        for m in client.models.list():
+            methods = getattr(m, "supported_actions", None) or getattr(m, "supported_generation_methods", None) or []
+            name = m.name.replace("models/", "")
+            if "generateContent" in methods or not methods:
+                names.append(name)
+        gemini = [n for n in names if n.startswith("gemini") and "embedding" not in n and "tts" not in n
+                  and "image" not in n and "live" not in n and "audio" not in n and "computer" not in n]
+        def rank(n):
+            if "lite" in n: return (0, n)
+            if "flash" in n: return (1, n)
+            if "pro" in n: return (2, n)
+            return (3, n)
+        ordered = sorted(set(gemini), key=rank)
+        # prefer concrete versions over -latest aliases within each tier
+        ordered.sort(key=lambda n: (rank(n)[0], "latest" in n, n))
+        return ordered
+    except Exception as e:
+        print(f"model discovery failed ({str(e)[:120]}); using static list", flush=True)
+        return ["gemini-3.8-flash-lite", "gemini-3.8-flash", "gemini-flash-latest"]
 
 
 async def run_once(model: str) -> str:
@@ -44,6 +69,11 @@ async def run_once(model: str) -> str:
 async def main(models: list, out: Path, attempts: int):
     import time
     load_dotenv(HERE / "change_management_agent" / ".env")
+    if models is None:
+        models = discover_models()
+        print("models available to this key, in the order they will be tried:", flush=True)
+        for m in models:
+            print("  ", m)
     last_err = None
     for model in models:
         for i in range(attempts):
@@ -60,7 +90,7 @@ async def main(models: list, out: Path, attempts: int):
                 msg = str(e)
                 print(f"  failed: {msg[:160]}", flush=True)
                 if "503" in msg or "UNAVAILABLE" in msg or "429" in msg or "RESOURCE_EXHAUSTED" in msg:
-                    wait = 20 * (i + 1)
+                    wait = 10 * (i + 1)
                     print(f"  waiting {wait}s before retry", flush=True)
                     time.sleep(wait)
                     continue
@@ -71,8 +101,14 @@ async def main(models: list, out: Path, attempts: int):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default=None, help="a single model id; default tries several in order")
-    ap.add_argument("--attempts", type=int, default=4, help="retries per model on 503/429")
+    ap.add_argument("--attempts", type=int, default=2, help="retries per model on 503/429")
+    ap.add_argument("--list-models", action="store_true", help="print the models this key can use and exit")
     ap.add_argument("--out", default=str(HERE / "OUTPUT-gemini.md"))
     a = ap.parse_args()
-    models = [a.model] if a.model else DEFAULT_MODELS
+    if a.list_models:
+        load_dotenv(HERE / "change_management_agent" / ".env")
+        for m in discover_models():
+            print(m)
+        raise SystemExit(0)
+    models = [a.model] if a.model else None
     asyncio.run(main(models, Path(a.out), a.attempts))
